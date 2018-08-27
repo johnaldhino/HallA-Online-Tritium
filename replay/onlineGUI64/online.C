@@ -1955,6 +1955,7 @@ void OnlineGUI::PrintPages() {
   if(!plotsdir.IsNull()) useJPG = kTRUE;
 
   TString filename = TString::Format("%s/summaryfiles/temp",sum_dir.Data());
+  // where sum dir is result of PWD
 
       
   if(runNumber!=0) {

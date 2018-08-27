@@ -12,9 +12,8 @@
 #include "def_tritium.h"
 using namespace std;
 
-#define RIGHT_ARM_CONDITION runnumber>=200000
-#define LEFT_ARM_CONDITION  runnumber<200000
-// attempting to chage this to fix problem
+#define RIGHT_ARM_CONDITION runnumber>=20000
+#define LEFT_ARM_CONDITION  runnumber<20000
 
 void replay_tritium(Int_t runnumber=0,Int_t numevents=0,Int_t fstEvt=0,Bool_t QuietRun = kFALSE, Bool_t OnlineReplay =kFALSE, Bool_t bPlots = kFALSE, Bool_t autoreplay = kFALSE){
 
@@ -462,7 +461,6 @@ void replay_tritium(Int_t runnumber=0,Int_t numevents=0,Int_t fstEvt=0,Bool_t Qu
       const char* CONFIGFILEPHYS=Form(REPLAY_DIR_PREFIX,"onlineGUI64/RHRS_phy.cfg");
 
       gSystem->Exec(Form("%sonline -P -f %s -r %d",GUI_DIR, CONFIGFILE,runnumber));
-      // uses online script in onlineGUI64 script (Onlinegui CONSTRUCTOR)
       gSystem->Exec(Form("mv %stemp_%d.pdf /chafs1/work1/tritium/Run_pdfs/right_detectors_%d.pdf",SUM_DIR,runnumber,runnumber));
       gSystem->Exec(Form("unlink %sright_detectors_latest.pdf",SUM_DIR));
       gSystem->Exec(Form("ln -s /chafs1/work1/tritium/Run_pdfs/right_detectors_%d.pdf %sright_detectors_latest.pdf",runnumber,SUM_DIR));
