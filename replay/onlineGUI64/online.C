@@ -713,33 +713,33 @@ void OnlineConfig::OverrideRootFile(UInt_t runnumber)
 
  
 
-  if(!protorootfile.IsNull()) {
-    TString rn = "";
-    rn += runnumber;
-    protorootfile.ReplaceAll("XXXXX",rn.Data());
-    rootfilename = protorootfile;
+  // if(!protorootfile.IsNull()) {
+  //   //    TString rn = "";
+  //   //    rn += runnumber;
+  //   //    protorootfile.ReplaceAll("XXXXX",rn.Data());
+  //   rootfilename = protorootfile;
 
 
-    //---------borrow from Tong Su--------------------
-  TString basename = rootfilename;
-    TString tempfilename = rootfilename;
-    basename.Remove(basename.Length()-5);
+  //   //---------borrow from Tong Su--------------------
+  //   TString basename = rootfilename;
+  //   TString tempfilename = rootfilename;
+  //   basename.Remove(basename.Length()-5);
 
-    Long_t split = 0;
+  //   Long_t split = 0;
 
-    while ( !gSystem->AccessPathName(tempfilename.Data()) ) {
-	split++;
-	tempfilename = basename + "_" + split + ".root";
-    }
-    if (split<=1)
-   { rootfilename=basename+".root";}
-   else
-    { split--;
-    rootfilename = basename + "_" + split + ".root";}
-    //---------------------------------------------------
-  } else {
+  //   while ( !gSystem->AccessPathName(tempfilename.Data()) ) {
+  // 	split++;
+  // 	tempfilename = basename + "_" + split + ".root";
+  //   }
+  //   if (split<=1)
+  //  { rootfilename=basename+".root";}
+  //  else
+  //   { split--;
+  //   rootfilename = basename + "_" + split + ".root";}
+  //   //---------------------------------------------------
+  // } else {
     rootfilename = GetRootFileName(runnumber);
-  }
+    //  }
 
   cout << "Overridden File name: " << rootfilename << endl;
 }
@@ -1956,6 +1956,7 @@ void OnlineGUI::PrintPages() {
   if(!plotsdir.IsNull()) useJPG = kTRUE;
 
   TString filename = TString::Format("%s/summaryfiles/temp",sum_dir.Data());
+  // where sum dir is result of PWD
 
       
   if(runNumber!=0) {
