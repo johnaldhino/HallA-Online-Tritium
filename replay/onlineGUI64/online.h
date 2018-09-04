@@ -61,6 +61,7 @@ struct drawcommand {
   TString objname;
   TString objtype;
   TString objtitle;
+  Double_t yaxis[2] = {0};
 };
 
 class OnlineConfig {

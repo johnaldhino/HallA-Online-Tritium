@@ -30,6 +30,7 @@
 #include "TPaveText.h"
 #ifdef STANDALONE
 #include <TApplication.h>
+#include <stdlib.h>
 #endif
 // #define DEBUGGETFILEOBJECTS
 // #define DEBUGPARSE
@@ -619,6 +620,11 @@ drawcommand OnlineConfig::GetDrawCommand(UInt_t page, UInt_t nCommand)
     if(sConfFile[index][i]=="-type") {
       out_command.type = sConfFile[index][i+1];
       i = i+1;
+    } else if(sConfFile[index][i]=="-yaxis") {
+      out_command.yaxis[0] = atof(sConfFile[index][i+1]);
+      cout << "Lower y-axis is " << out_command.yaxis[0] << "\n";
+      out_command.yaxis[1] = atof(sConfFile[index][i+2]);
+      i = i+1;     
     } else if(sConfFile[index][i]=="-title") {
       // Put the entire title, surrounded by quotes, as one TString
       TString title;
@@ -1115,10 +1121,17 @@ void OnlineGUI::DoDraw()
   for(UInt_t i=0; i<draw_count; i++) {    
     thiscommand = fConfig->GetDrawCommand(current_page,i);
     thiscommand = fileObject2command(thiscommand,&fRootFile);
+
+    // JW: check for command type properties
+    cout << "///// Command type is : " <<  thiscommand.objtype << " and it has y values of " << thiscommand.yaxis[0] << " and " << thiscommand.yaxis[1]  << "\n";
     //comment by yang    fCanvas->cd(i+1);
     //yang
     fpad->cd(i+1);
     //yang
+
+    //JW : check the objtype of commands
+    cout << ">>>>>>> objtype is " <<  thiscommand.objtype << "\n";
+
     if (thiscommand.variable == "macro") {
       MacroDraw(thiscommand);
     } else if (thiscommand.objtype.Contains("TH")) {
@@ -1128,6 +1141,8 @@ void OnlineGUI::DoDraw()
     } else if (thiscommand.objtype.Contains("TGraph")) {
       GraphDraw(thiscommand);
     } else { // otherwise... assume that the objtype is a branch from a tree
+      // JW:: first tree draw (sanity) check
+      cout << "~~~~~~~~ About to enter TreeDraw ~~~~~~~" << "\n" ;
       TreeDraw(thiscommand);
     }
   }
@@ -1580,6 +1595,12 @@ void OnlineGUI::HistDraw(const drawcommand& command) {
     fDir = (TDirectory*)fRootFile.RootFile->Get(command.directory);
   }
   
+  // JW: getting y-axis parameters
+  Double_t yval1 = command.yaxis[0];
+  Double_t yval2 = command.yaxis[1];
+
+
+
   // Determine dimensionality of histogram, then draw it
   if(command.objtype.Contains("TH1")) {
     // Operation for TH1
@@ -1619,6 +1640,11 @@ void OnlineGUI::HistDraw(const drawcommand& command) {
 	nhist = fRootFile.mytemp1d->GetEntries();
 	ngolden = fGoldenFile.mytemp1d->GetEntries();
 	fGoldenFile.mytemp1d->Scale(nhist/ngolden);
+	// JW : adjusted axes
+	if(yval2 != 0){
+	  fGoldenFile.mytemp1d->GetYaxis()->SetRangeUser(yval1,yval2);
+	  fRootFile.mytemp1d->GetYaxis()->SetRangeUser(yval1,yval2);
+	}
 	fGoldenFile.mytemp1d->Draw();
 	if(!htitle.IsNull()) fGoldenFile.mytemp1d->SetTitle(htitle);
 	fRootFile.mytemp1d->Draw("sames"+type);
@@ -1734,6 +1760,9 @@ drawcommand OnlineGUI::fileObject2command(drawcommand command, RootFileObject* f
 void OnlineGUI::TreeDraw(const drawcommand& command) {
   // Called by DoDraw(), this will plot a Tree Variable
 
+  // JW: added comment for checking
+  cout << " Entered TreeDraw function! " << "\n";
+
   TString var = command.variable;
   Bool_t showGolden=kFALSE;
   if(doGolden) showGolden=kTRUE;
@@ -1769,6 +1798,14 @@ void OnlineGUI::TreeDraw(const drawcommand& command) {
   Int_t errcode=0;
   if(drawopt.IsNull() && var.Contains(":")) drawopt = "cont";
   if(drawopt=="scat") drawopt = "";
+
+  // JW: getting y-axis parameters
+
+  Double_t yval1 = command.yaxis[0];
+  Double_t yval2 = command.yaxis[1];
+
+  cout << " Check for y values " << " yval1 == " << yval1 << "|| yval2 == " << yval2 << "\n"; 
+
 
   fRootFile.RootFile->cd();
   if (iTree <= fRootFile.RootTree.size() ) {
@@ -1822,14 +1859,24 @@ void OnlineGUI::TreeDraw(const drawcommand& command) {
 	  Int_t fillstyle=3027;
 	  if(fPrintOnly) fillstyle=3010;
 	  goldhist->SetFillStyle(fillstyle);
+	  // JW adding new y-axis range to Histograms
+	  if(yval2 != 0){
+	    cout << " BLLLLLLLELELELELELELELE!" << "\n";
+	    goldhist->GetYaxis()->SetRangeUser(yval1,yval2);
+	    mainhist->GetYaxis()->SetRangeUser(yval1,yval2);
+	  }
+	  else if (yval2 == 0){
+	    cout << "BOOO!" << "y-axis is : " << yval1 << " - " << yval2 << "\n";
+	  }
           goldhist->Draw(drawopt);
           mainhist->SetFillColor(0);
           mainhist->SetFillStyle(1001);
-          mainhist->Draw("same");
+          mainhist->Draw("same");	  
           if(!command.title.IsNull()) goldhist->SetTitle(command.title);
           if(!showStat)               goldhist->SetStats(kFALSE);
         }
       } else {
+	  cout << " Skipping all yer statements " << "\n";
         if(!command.title.IsNull()) mainhist->SetTitle(command.title);
         if(!showStat)               mainhist->SetStats(kFALSE);
       }
