@@ -29,6 +29,7 @@ block rpl.*
 block exL.*
 block EKLxe.*
 block EKLx.*
+block EKL.*
 #block LeftBCM*
 
 #beam correction variables
