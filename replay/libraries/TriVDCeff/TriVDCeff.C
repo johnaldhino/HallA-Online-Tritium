@@ -123,7 +123,9 @@ Int_t TriVDCeff::Begin( THaRunBase* )
     if( !thePlane.hist_nhit ) {
       TString name = thePlane.histname + nhit_suffix;
       TString title = "Num hits " + thePlane.histname;
-      Int_t nmax = TMath::Nint( thePlane.nwire * fMaxOcc );
+      //      Int_t nmax = TMath::Nint( thePlane.nwire * fMaxOcc );
+      // JW: commented out line which multiplies nwire (no of wires) by fMaxOCc which I think is the maximum occupancy ie the largest portion of wires which were ever filled. Replace with following line of 30 as very few times this number of wires are hit and this make the logarithmic scale hard to read for more common number of wire hits
+      Int_t nmax = 30;
       thePlane.hist_nhit = new TH1F( name, title, nmax, -1, nmax-1 );
     }
     if( !thePlane.hist_eff ) {
