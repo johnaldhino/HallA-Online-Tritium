@@ -39,8 +39,8 @@
 const char* REPLAY_DIR_PREFIX = "./%s";
 const char* ROOTFILE_DIR_PREFIX = "./rootfiles/%s";
 
-// JW: adding start of genral root and golden file names
-const char* CONFIG_ROOT_PREFIX = "/w/work3/home/johnw/tritium_"
+// JW: adding start of genral root and golden file names (idea stalled)
+// const char* CONFIG_ROOT_PREFIX = "/w/work3/home/johnw/tritium_"
 
 typedef struct _sReplaySetUp
 {
