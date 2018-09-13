@@ -30,6 +30,7 @@
 #include "TPaveText.h"
 #ifdef STANDALONE
 #include <TApplication.h>
+#include <stdlib.h>
 #endif
 // #define DEBUGGETFILEOBJECTS
 // #define DEBUGPARSE
@@ -618,6 +619,11 @@ drawcommand OnlineConfig::GetDrawCommand(UInt_t page, UInt_t nCommand)
   for (UInt_t i=1; i<sConfFile[index].size(); i++) {
     if(sConfFile[index][i]=="-type") {
       out_command.type = sConfFile[index][i+1];
+      i = i+1;
+    } else if(sConfFile[index][i]=="-yaxis") {
+      out_command.yaxis[0] = atof(sConfFile[index][i+1]);
+      cout << "Lower y-axis is " << out_command.yaxis[0] << "\n";
+      out_command.yaxis[1] = atof(sConfFile[index][i+2]);
       i = i+1;
     } else if(sConfFile[index][i]=="-title") {
       // Put the entire title, surrounded by quotes, as one TString
@@ -1619,6 +1625,11 @@ void OnlineGUI::HistDraw(const drawcommand& command) {
 	nhist = fRootFile.mytemp1d->GetEntries();
 	ngolden = fGoldenFile.mytemp1d->GetEntries();
 	fGoldenFile.mytemp1d->Scale(nhist/ngolden);
+        // JW : adjusted axes
+        if(yval2 != 0){
+          fGoldenFile.mytemp1d->GetYaxis()->SetRangeUser(yval1,yval2);
+          fRootFile.mytemp1d->GetYaxis()->SetRangeUser(yval1,yval2);
+	}
 	fGoldenFile.mytemp1d->Draw();
 	if(!htitle.IsNull()) fGoldenFile.mytemp1d->SetTitle(htitle);
 	fRootFile.mytemp1d->Draw("sames"+type);
