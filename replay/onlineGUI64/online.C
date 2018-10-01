@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 //  Macro to help with online analysis
 //    B. Moffit (moffit@jlab.org)
 //    - Originally written in Oct. 2003
@@ -625,7 +625,14 @@ drawcommand OnlineConfig::GetDrawCommand(UInt_t page, UInt_t nCommand)
       cout << "Lower y-axis is " << out_command.yaxis[0] << "\n";
       out_command.yaxis[1] = atof(sConfFile[index][i+2]);
       i = i+1;
-    } else if(sConfFile[index][i]=="-title") {
+    }
+    else if(sConfFile[index][i]=="-xaxis") {
+      out_command.xaxis[0] = atof(sConfFile[index][i+1]);
+      cout << "Lower x-axis is " << out_command.xaxis[0] << "\n";
+      out_command.xaxis[1] = atof(sConfFile[index][i+2]);
+      i = i+1;
+    } 
+    else if(sConfFile[index][i]=="-title") {
       // Put the entire title, surrounded by quotes, as one TString
       TString title;
       UInt_t j=0;
@@ -719,33 +726,33 @@ void OnlineConfig::OverrideRootFile(UInt_t runnumber)
 
  
 
-  if(!protorootfile.IsNull()) {
-    TString rn = "";
-    rn += runnumber;
-    protorootfile.ReplaceAll("XXXXX",rn.Data());
-    rootfilename = protorootfile;
+  // if(!protorootfile.IsNull()) {
+  //   TString rn = "";
+  //   rn += runnumber;
+  //   protorootfile.ReplaceAll("XXXXX",rn.Data());
+  //   rootfilename = protorootfile;
 
 
-    //---------borrow from Tong Su--------------------
-  TString basename = rootfilename;
-    TString tempfilename = rootfilename;
-    basename.Remove(basename.Length()-5);
+  //   //---------borrow from Tong Su--------------------
+  // TString basename = rootfilename;
+  //   TString tempfilename = rootfilename;
+  //   basename.Remove(basename.Length()-5);
 
-    Long_t split = 0;
+  //   Long_t split = 0;
 
-    while ( !gSystem->AccessPathName(tempfilename.Data()) ) {
-	split++;
-	tempfilename = basename + "_" + split + ".root";
-    }
-    if (split<=1)
-   { rootfilename=basename+".root";}
-   else
-    { split--;
-    rootfilename = basename + "_" + split + ".root";}
-    //---------------------------------------------------
-  } else {
+  //   while ( !gSystem->AccessPathName(tempfilename.Data()) ) {
+  // 	split++;
+  // 	tempfilename = basename + "_" + split + ".root";
+  //   }
+  //   if (split<=1)
+  //  { rootfilename=basename+".root";}
+  //  else
+  //   { split--;
+  //   rootfilename = basename + "_" + split + ".root";}
+  //   //---------------------------------------------------
+  // } else {
     rootfilename = GetRootFileName(runnumber);
-  }
+    //  }
 
   cout << "Overridden File name: " << rootfilename << endl;
 }
@@ -1586,6 +1593,15 @@ void OnlineGUI::HistDraw(const drawcommand& command) {
     fDir = (TDirectory*)fRootFile.RootFile->Get(command.directory);
   }
   
+  // JW: getting y-axis parameters
+  Double_t yval1 = command.yaxis[0];
+  Double_t yval2 = command.yaxis[1];
+
+  Double_t xval1 = command.xaxis[0];
+  Double_t xval2 = command.xaxis[1];
+
+
+
   // Determine dimensionality of histogram, then draw it
   if(command.objtype.Contains("TH1")) {
     // Operation for TH1
@@ -1629,6 +1645,10 @@ void OnlineGUI::HistDraw(const drawcommand& command) {
         if(yval2 != 0){
           fGoldenFile.mytemp1d->GetYaxis()->SetRangeUser(yval1,yval2);
           fRootFile.mytemp1d->GetYaxis()->SetRangeUser(yval1,yval2);
+	}
+        if(xval2 != 0){
+          fGoldenFile.mytemp1d->GetXaxis()->SetRangeUser(xval1,xval2);
+          fRootFile.mytemp1d->GetXaxis()->SetRangeUser(xval1,xval2);
 	}
 	fGoldenFile.mytemp1d->Draw();
 	if(!htitle.IsNull()) fGoldenFile.mytemp1d->SetTitle(htitle);
@@ -1781,6 +1801,16 @@ void OnlineGUI::TreeDraw(const drawcommand& command) {
   if(drawopt.IsNull() && var.Contains(":")) drawopt = "cont";
   if(drawopt=="scat") drawopt = "";
 
+    // JW: getting y-axis parameters
+
+  Double_t yval1 = command.yaxis[0];
+  Double_t yval2 = command.yaxis[1];
+
+  Double_t xval1 = command.xaxis[0];
+  Double_t xval2 = command.xaxis[1];
+
+
+
   fRootFile.RootFile->cd();
   if (iTree <= fRootFile.RootTree.size() ) {
     TObjArray* tok = var.Tokenize(">()");
@@ -1833,6 +1863,24 @@ void OnlineGUI::TreeDraw(const drawcommand& command) {
 	  Int_t fillstyle=3027;
 	  if(fPrintOnly) fillstyle=3010;
 	  goldhist->SetFillStyle(fillstyle);
+          // JW adding new y-axis range to Histograms
+          if(yval2 != 0){
+            cout << " BLLLLLLLELELELELELELELE!" << "\n";
+            goldhist->GetYaxis()->SetRangeUser(yval1,yval2);
+            mainhist->GetYaxis()->SetRangeUser(yval1,yval2);
+          }
+          else if (yval2 == 0){
+            cout << "BOOO!" << "y-axis is : " << yval1 << " - " << yval2 << "\n";
+          }
+          if(xval2 != 0){
+            cout << " BLLLLLLLELELELELELELELE!" << "\n";
+            goldhist->GetXaxis()->SetRangeUser(xval1,xval2);
+            mainhist->GetXaxis()->SetRangeUser(xval1,xval2);
+          }
+          else if (xval2 == 0){
+            cout << "BOOO!" << "x-axis is : " << xval1 << " - " << xval2 << "\n";
+          }
+
           goldhist->Draw(drawopt);
           mainhist->SetFillColor(0);
           mainhist->SetFillStyle(1001);
