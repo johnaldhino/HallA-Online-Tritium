@@ -1066,6 +1066,7 @@ void OnlineGUI::DoDraw()
 //  gStyle->SetPalette(1);
   gROOT->ForceStyle();
 #endif
+  gStyle->SetOptStat(0);
 
   // Determine the dimensions of the canvas..
   UInt_t draw_count = fConfig->GetDrawCount(current_page);
